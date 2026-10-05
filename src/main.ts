@@ -2,6 +2,7 @@ import {
   testFiniteLimit,
   type FiniteLimitTestResult,
 } from "./sequences/testFiniteLimit";
+import { testFiniteLimitForEpsilons } from "./sequences/testFiniteLimitForEpsilons";
 
 const sequence = (n: number): number => {
   return 2 + 1 / n ** 2;
@@ -70,3 +71,35 @@ const wrongResult = testFiniteLimit(sequence, 2.5, 0.1, 10_000, {
 
 printFiniteLimitResult("Test avec la bonne conjecture L = 2", correctResult);
 printFiniteLimitResult("Test avec la mauvaise conjecture L = 2.5", wrongResult);
+
+const epsilonTests = testFiniteLimitForEpsilons(
+  sequence,
+  2,
+  [1, 0.1, 0.01, 0.001, 0.0001],
+  100_000,
+);
+
+console.table(
+  epsilonTests.results.map((result) => ({
+    epsilon: result.epsilon,
+    lowerBound: result.lowerBound,
+    upperBound: result.upperBound,
+    candidateN: result.candidateN,
+    status: result.status,
+  })),
+);
+
+const wrongEpsilonTests = testFiniteLimitForEpsilons(
+  sequence,
+  2.5,
+  [1, 0.5, 0.25, 0.1, 0.01],
+  100_000,
+);
+
+console.table(
+  wrongEpsilonTests.results.map((result) => ({
+    epsilon: result.epsilon,
+    candidateN: result.candidateN,
+    status: result.status,
+  })),
+);
