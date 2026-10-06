@@ -132,3 +132,35 @@ const negativeResult = testInfiniteLimit(
 
 console.log("Test de limite -∞");
 console.table(negativeResult);
+
+import { testInfiniteLimitForThresholds } from "./sequences/testInfiniteLimitForThresholds";
+
+const thresholdTests = testInfiniteLimitForThresholds(
+  sequencePositive,
+  "positive",
+  [1, 10, 100, 1000],
+  1_000_000,
+);
+
+console.table(
+  thresholdTests.results.map((result) => ({
+    A: result.threshold,
+    candidateN: result.candidateN,
+    status: result.status,
+  })),
+);
+
+const wrongInfiniteResult = testInfiniteLimitForThresholds(
+  sequence,
+  "positive",
+  [1, 2, 3, 10, 100],
+  10_000,
+);
+
+console.table(
+  wrongInfiniteResult.results.map((result) => ({
+    A: result.threshold,
+    candidateN: result.candidateN,
+    status: result.status,
+  })),
+);
