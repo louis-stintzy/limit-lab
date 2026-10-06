@@ -3,6 +3,7 @@ import {
   type FiniteLimitTestResult,
 } from "./sequences/testFiniteLimit";
 import { testFiniteLimitForEpsilons } from "./sequences/testFiniteLimitForEpsilons";
+import { testInfiniteLimit } from "./sequences/testInfiniteLimit";
 
 const sequence = (n: number): number => {
   return 2 + 1 / n ** 2;
@@ -103,3 +104,31 @@ console.table(
     status: result.status,
   })),
 );
+
+const sequencePositive = (n: number): number => {
+  return Math.sqrt(3 * n + 4);
+};
+
+const positiveResult = testInfiniteLimit(
+  sequencePositive,
+  "positive",
+  100,
+  10_000,
+);
+
+console.log("Test de limite +∞");
+console.table(positiveResult);
+
+const sequenceNegative = (n: number): number => {
+  return -(n ** 2);
+};
+
+const negativeResult = testInfiniteLimit(
+  sequenceNegative,
+  "negative",
+  -100,
+  10_000,
+);
+
+console.log("Test de limite -∞");
+console.table(negativeResult);
