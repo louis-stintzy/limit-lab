@@ -13,72 +13,94 @@
         <p>Laboratoire numérique pour explorer les limites de suites.</p>
       </header>
 
-      <section class="panel">
-        <form id="limit-form">
-          <div class="field">
-            <label for="sequence-expression"> Suite u(n) </label>
-
-            <input
-              id="sequence-expression"
-              type="text"
-              value="2 + 1 / n^2"
-              required
-            />
-
-            <small> Exemple : 2 + 1 / n^2 ou sqrt(3 * n + 4) </small>
-          </div>
-
-          <div class="field">
-            <label for="limit-type"> Limite conjecturée </label>
-
-            <select id="limit-type">
-              <option value="finite">Limite finie</option>
-
-              <option value="positiveInfinity">+∞</option>
-
-              <option value="negativeInfinity">-∞</option>
-            </select>
-          </div>
-
-          <div id="finite-fields">
+      <div class="workspace">
+        <section class="panel">
+          <form id="limit-form">
             <div class="field">
-              <label for="limit-value"> Valeur L </label>
-
-              <input id="limit-value" type="number" value="2" step="any" />
-            </div>
-
-            <div class="field">
-              <label for="epsilon"> ε </label>
+              <label for="sequence-expression"> Suite u(n) </label>
 
               <input
-                id="epsilon"
-                type="number"
-                value="0.01"
-                min="0"
-                step="any"
+                id="sequence-expression"
+                type="text"
+                value="2 + 1 / n^2"
+                required
               />
-            </div>
-          </div>
 
-          <div id="infinite-fields" hidden>
+              <small> Exemple : 2 + 1 / n^2 ou sqrt(3 * n + 4) </small>
+
+              <details class="expression-help">
+                <summary>Aide sur l'écriture des formules</summary>
+
+                <p>
+                  <code>n^2</code> : n² · <code>sqrt(n)</code> : √n ·
+                  <code>abs(n)</code> : |n| · <code>exp(n)</code> : eⁿ
+                </p>
+
+                <p>
+                  Fonctions également disponibles :
+                  <code>log</code>, <code>sin</code>, <code>cos</code>,
+                  <code>tan</code>.
+                </p>
+
+                <p>
+                  Constantes :
+                  <code>pi</code> et <code>e</code>.
+                </p>
+              </details>
+            </div>
+
             <div class="field">
-              <label for="threshold"> Seuil A </label>
+              <label for="limit-type"> Limite conjecturée </label>
 
-              <input id="threshold" type="number" value="100" step="any" />
+              <select id="limit-type">
+                <option value="finite">Limite finie</option>
+
+                <option value="positiveInfinity">+∞</option>
+
+                <option value="negativeInfinity">-∞</option>
+              </select>
             </div>
-          </div>
 
-          <div class="field">
-            <label for="max-n"> Rang maximal testé </label>
+            <div id="finite-fields">
+              <div class="field">
+                <label for="limit-value"> Valeur L </label>
 
-            <input id="max-n" type="number" value="10000" min="1" step="1" />
-          </div>
+                <input id="limit-value" type="number" value="2" step="any" />
+              </div>
 
-          <button type="submit">Tester la conjecture</button>
-        </form>
-      </section>
+              <div class="field">
+                <label for="epsilon"> ε </label>
 
-      <section id="result" class="panel" hidden></section>
+                <input
+                  id="epsilon"
+                  type="number"
+                  value="0.01"
+                  min="0"
+                  step="any"
+                />
+              </div>
+            </div>
+
+            <div id="infinite-fields" hidden>
+              <div class="field">
+                <label for="threshold"> Seuil A </label>
+
+                <input id="threshold" type="number" value="100" step="any" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="max-n"> Rang maximal testé </label>
+
+              <input id="max-n" type="number" value="10000" min="1" step="1" />
+            </div>
+
+            <button type="submit">Tester la conjecture</button>
+          </form>
+        </section>
+
+        <section id="result" class="panel" hidden></section>
+      </div>
     </main>
 
     <script type="module" src="/src/main.ts"></script>

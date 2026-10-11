@@ -45,6 +45,53 @@ limitTypeSelect.addEventListener("change", () => {
   infiniteFields.hidden = isFinite;
 });
 
+function renderFiniteTermsTable(
+  terms: {
+    n: number;
+    value: number;
+    isInside: boolean;
+    distanceToLimit: number;
+  }[],
+): string {
+  if (terms.length === 0) {
+    return "<p>Aucun terme à afficher.</p>";
+  }
+
+  const rows = terms
+    .map(
+      (term) => `
+        <tr>
+          <td>${term.n}</td>
+          <td>${term.value.toFixed(8)}</td>
+          <td>${term.distanceToLimit.toFixed(8)}</td>
+          <td class="${term.isInside ? "term-valid" : "term-invalid"}">
+            ${term.isInside ? "✓" : "✗"}
+          </td>
+        </tr>
+      `,
+    )
+    .join("");
+
+  return `
+    <div class="terms-table-wrapper">
+      <table class="terms-table">
+        <thead>
+          <tr>
+            <th>n</th>
+            <th>u(n)</th>
+            <th>|u(n) - L|</th>
+            <th>Dans l'intervalle ?</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 // ----- Traitement d'une limite finie ------
 
 function runFiniteLimitTest(expression: string, maxN: number): void {
@@ -54,7 +101,10 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
 
   const sequence = createSequenceFromExpression(expression);
 
-  const result = testFiniteLimit(sequence, limit, epsilon, maxN);
+  const result = testFiniteLimit(sequence, limit, epsilon, maxN, {
+    captureTermsUpTo: 30,
+    outsideExamplesCount: 5,
+  });
 
   const candidateText =
     result.candidateN === null
@@ -62,44 +112,50 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
       : `Rang candidat : N = ${result.candidateN}`;
 
   resultSection.innerHTML = `
-    <h2>Résultat</h2>
+  <h2>Résultat</h2>
 
-    <p>
-      Suite :
+  <div class="result-summary">
+    <div>
+      <span>Suite</span>
       <strong>u(n) = ${expression}</strong>
-    </p>
+    </div>
 
-    <p>
-      Limite conjecturée :
+    <div>
+      <span>Limite conjecturée</span>
       <strong>${limit}</strong>
-    </p>
+    </div>
 
-    <p>
-      ε = ${epsilon}
-    </p>
+    <div>
+      <span>ε</span>
+      <strong>${epsilon}</strong>
+    </div>
 
-    <p>
-      Intervalle :
-      ]${result.lowerBound} ;
-      ${result.upperBound}[
-    </p>
+    <div>
+      <span>Intervalle</span>
+      <strong>]${result.lowerBound} ; ${result.upperBound}[</strong>
+    </div>
 
-    <p>
-      ${candidateText}
-    </p>
-
-    <p>
-      Test effectué jusqu'à
-      n = ${result.testedUntil}.
-    </p>
-
-    <p>
+    <div>
+      <span>Rang candidat</span>
       <strong>
-        ⚠ Ceci est un test numérique,
-        pas une preuve mathématique.
+        ${result.candidateN === null ? "Aucun" : `N = ${result.candidateN}`}
       </strong>
-    </p>
-  `;
+    </div>
+
+    <div>
+      <span>Test effectué jusqu'à</span>
+      <strong>n = ${result.testedUntil}</strong>
+    </div>
+  </div>
+
+  <h3>Premiers termes de la suite</h3>
+
+  ${renderFiniteTermsTable(result.capturedTerms)}
+
+  <p class="numeric-warning">
+    ⚠ Test numérique : ce résultat ne constitue pas une preuve mathématique.
+  </p>
+`;
 }
 
 // ----- Traitement de \(+\infty\) et \(-\infty\) -----
