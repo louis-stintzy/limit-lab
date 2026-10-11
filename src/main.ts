@@ -3,6 +3,10 @@ import "./style.css";
 import { createSequenceFromExpression } from "./math/createSequenceFromExpression";
 import { testFiniteLimit } from "./sequences/testFiniteLimit";
 import { testInfiniteLimit } from "./sequences/testInfiniteLimit";
+import type {
+  InfiniteLimitDirection,
+  InfiniteLimitTestedTerm,
+} from "./sequences/testInfiniteLimit";
 
 type LimitType = "finite" | "positiveInfinity" | "negativeInfinity";
 
@@ -81,6 +85,62 @@ function renderFiniteTermsTable(
             <th>u(n)</th>
             <th>|u(n) - L|</th>
             <th>Dans l'intervalle ?</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderInfiniteTermsTable(
+  terms: InfiniteLimitTestedTerm[],
+  direction: InfiniteLimitDirection,
+  threshold: number,
+): string {
+  if (terms.length === 0) {
+    return "<p>Aucun terme à afficher.</p>";
+  }
+
+  const condition =
+    direction === "positive" ? `u(n) > ${threshold}` : `u(n) < ${threshold}`;
+
+  const rows = terms
+    .map(
+      (term) => `
+        <tr>
+          <td>${term.n}</td>
+
+          <td>
+            ${term.value.toFixed(8)}
+          </td>
+
+          <td>
+            ${term.marginToThreshold.toFixed(8)}
+          </td>
+
+          <td
+            class="${term.isBeyondThreshold ? "term-valid" : "term-invalid"}"
+          >
+            ${term.isBeyondThreshold ? "✓" : "✗"}
+          </td>
+        </tr>
+      `,
+    )
+    .join("");
+
+  return `
+    <div class="terms-table-wrapper">
+      <table class="terms-table">
+        <thead>
+          <tr>
+            <th>n</th>
+            <th>u(n)</th>
+            <th>Marge au seuil</th>
+            <th>${condition}</th>
           </tr>
         </thead>
 
@@ -173,54 +233,73 @@ function runInfiniteLimitTest(
 
   const result = testInfiniteLimit(sequence, direction, threshold, maxN);
 
-  const symbol = direction === "positive" ? "+∞" : "-∞";
+  // const symbol = direction === "positive" ? "+∞" : "-∞";
 
-  const inequality =
-    direction === "positive" ? `u(n) > ${threshold}` : `u(n) < ${threshold}`;
+  // const inequality =
+  //   direction === "positive" ? `u(n) > ${threshold}` : `u(n) < ${threshold}`;
+
+  // const candidateText =
+  //   result.candidateN === null
+  //     ? "Aucun rang candidat trouvé."
+  //     : `Rang candidat : N = ${result.candidateN}`;
 
   const candidateText =
-    result.candidateN === null
-      ? "Aucun rang candidat trouvé."
-      : `Rang candidat : N = ${result.candidateN}`;
+    result.candidateN === null ? "Aucun" : `N = ${result.candidateN}`;
+
+  const limitSymbol = direction === "positive" ? "+∞" : "-∞";
+
+  const condition =
+    direction === "positive" ? `u(n) > ${threshold}` : `u(n) < ${threshold}`;
 
   resultSection.innerHTML = `
-    <h2>Résultat</h2>
+  <h2>Résultat</h2>
 
-    <p>
-      Suite :
-      <strong>u(n) = ${expression}</strong>
-    </p>
-
-    <p>
-      Limite conjecturée :
-      <strong>${symbol}</strong>
-    </p>
-
-    <p>
-      Seuil A = ${threshold}
-    </p>
-
-    <p>
-      Condition recherchée :
-      <strong>${inequality}</strong>
-    </p>
-
-    <p>
-      ${candidateText}
-    </p>
-
-    <p>
-      Test effectué jusqu'à
-      n = ${result.testedUntil}.
-    </p>
-
-    <p>
+  <div class="result-summary">
+    <div>
+      <span>Suite</span>
       <strong>
-        ⚠ Ceci est un test numérique,
-        pas une preuve mathématique.
+        u(n) = ${expression}
       </strong>
-    </p>
-  `;
+    </div>
+
+    <div>
+      <span>Limite conjecturée</span>
+      <strong>${limitSymbol}</strong>
+    </div>
+
+    <div>
+      <span>Seuil A</span>
+      <strong>${threshold}</strong>
+    </div>
+
+    <div>
+      <span>Condition</span>
+      <strong>${condition}</strong>
+    </div>
+
+    <div>
+      <span>Rang candidat</span>
+      <strong>${candidateText}</strong>
+    </div>
+
+    <div>
+      <span>Test effectué jusqu'à</span>
+      <strong>
+        n = ${result.testedUntil}
+      </strong>
+    </div>
+  </div>
+
+  <h3>Termes significatifs</h3>
+
+  ${renderInfiniteTermsTable(result.sampledTerms, direction, threshold)}
+
+  <p class="numeric-warning">
+    ⚠ Test numérique :
+    ce résultat ne constitue pas
+    une preuve mathématique.
+  </p>
+`;
 }
 
 // ----- Soumission du formulaire -----

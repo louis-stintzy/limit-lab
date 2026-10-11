@@ -7,6 +7,13 @@ export type InfiniteLimitTestStatus =
   | "candidateFoundWithinTestRange"
   | "noCandidateFoundWithinTestRange";
 
+export type InfiniteLimitTestedTerm = {
+  n: number;
+  value: number;
+  isBeyondThreshold: boolean;
+  marginToThreshold: number;
+};
+
 export type InfiniteLimitTestResult = {
   direction: InfiniteLimitDirection;
   threshold: number;
@@ -16,6 +23,8 @@ export type InfiniteLimitTestResult = {
   testedUntil: number;
   lastOutsideN: number | null;
   candidateN: number | null;
+
+  sampledTerms: InfiniteLimitTestedTerm[];
 };
 
 export function testInfiniteLimit(
@@ -60,8 +69,15 @@ export function testInfiniteLimit(
     candidateN = lastOutsideN + 1;
   } else {
     status = "noCandidateFoundWithinTestRange";
+
     candidateN = null;
   }
+
+  const sampledIndexes = buildSampleIndexes(candidateN, maxN);
+
+  const sampledTerms = sampledIndexes.map((n) =>
+    createTestedTerm(sequence, n, direction, threshold),
+  );
 
   return {
     direction,
@@ -70,5 +86,56 @@ export function testInfiniteLimit(
     testedUntil: maxN,
     lastOutsideN,
     candidateN,
+    sampledTerms,
   };
+}
+
+function createTestedTerm(
+  sequence: Sequence,
+  n: number,
+  direction: InfiniteLimitDirection,
+  threshold: number,
+): InfiniteLimitTestedTerm {
+  const value = sequence(n);
+
+  const isBeyondThreshold =
+    direction === "positive" ? value > threshold : value < threshold;
+
+  const marginToThreshold =
+    direction === "positive" ? value - threshold : threshold - value;
+
+  return {
+    n,
+    value,
+    isBeyondThreshold,
+    marginToThreshold,
+  };
+}
+
+function buildSampleIndexes(candidateN: number | null, maxN: number): number[] {
+  const indexes = new Set<number>();
+
+  // Quelques premiers termes.
+  for (let n = 1; n <= Math.min(8, maxN); n++) {
+    indexes.add(n);
+  }
+
+  if (candidateN !== null) {
+    // Quelques termes autour du rang candidat.
+    for (
+      let n = Math.max(1, candidateN - 3);
+      n <= Math.min(maxN, candidateN + 3);
+      n++
+    ) {
+      indexes.add(n);
+    }
+  } else {
+    // Si aucun rang candidat n'a été trouvé,
+    // on regarde également la fin de la zone testée.
+    for (let n = Math.max(1, maxN - 4); n <= maxN; n++) {
+      indexes.add(n);
+    }
+  }
+
+  return [...indexes].sort((a, b) => a - b);
 }

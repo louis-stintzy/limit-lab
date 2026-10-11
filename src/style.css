@@ -137,6 +137,12 @@ button {
   background: white;
 }
 
+.terms-table td:nth-child(1),
+.terms-table td:nth-child(2),
+.terms-table td:nth-child(3) {
+  font-variant-numeric: tabular-nums;
+}
+
 .term-valid {
   font-weight: bold;
 }
@@ -144,6 +150,12 @@ button {
 .term-invalid {
   font-weight: bold;
 }
+
+/* .term-valid,
+.term-invalid {
+  text-align: center !important;
+  font-size: 1.1rem;
+} */
 
 .numeric-warning {
   margin-bottom: 0;
