@@ -12,6 +12,11 @@ import type { FiniteLimitTestResult } from "./sequences/testFiniteLimit";
 import { testInfiniteLimitForThresholds } from "./sequences/testInfiniteLimitForThresholds";
 import type { InfiniteLimitTestResult } from "./sequences/testInfiniteLimit";
 
+import {
+  renderFiniteSequenceChart,
+  renderInfiniteSequenceChart,
+} from "./chart/sequenceChart";
+
 type LimitType = "finite" | "positiveInfinity" | "negativeInfinity";
 
 function getElement<T extends HTMLElement>(id: string): T {
@@ -361,6 +366,10 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
     </div>
   </div>
 
+  <div class="chart-wrapper">
+    <canvas id="sequence-chart"></canvas>
+  </div>
+
   <h3>Premiers termes de la suite</h3>
 
   ${renderFiniteTermsTable(result.capturedTerms)}
@@ -371,6 +380,17 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
     ⚠ Test numérique : ce résultat ne constitue pas une preuve mathématique.
   </p>
 `;
+
+  const canvas = getElement<HTMLCanvasElement>("sequence-chart");
+
+  renderFiniteSequenceChart(
+    canvas,
+    sequence,
+    limit,
+    epsilon,
+    maxN,
+    result.candidateN,
+  );
 }
 
 // ----- Traitement de \(+\infty\) et \(-\infty\) -----
@@ -454,6 +474,10 @@ function runInfiniteLimitTest(
     </div>
   </div>
 
+  <div class="chart-wrapper">
+    <canvas id="sequence-chart"></canvas>
+  </div>
+
   <h3>Termes significatifs</h3>
 
   ${renderInfiniteTermsTable(result.sampledTerms, direction, threshold)}
@@ -466,6 +490,17 @@ function runInfiniteLimitTest(
     une preuve mathématique.
   </p>
 `;
+
+  const canvas = getElement<HTMLCanvasElement>("sequence-chart");
+
+  renderInfiniteSequenceChart(
+    canvas,
+    sequence,
+    direction,
+    threshold,
+    maxN,
+    result.candidateN,
+  );
 }
 
 // ----- Soumission du formulaire -----
