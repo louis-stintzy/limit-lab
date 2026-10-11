@@ -94,7 +94,33 @@
 
               <input id="max-n" type="number" value="10000" min="1" step="1" />
             </div>
+            <details class="multi-test-options">
+              <summary>Tests multiples</summary>
 
+              <div id="finite-multi-fields" class="field">
+                <label for="epsilon-list"> Valeurs de ε </label>
+
+                <input
+                  id="epsilon-list"
+                  type="text"
+                  value="1, 0.1, 0.01, 0.001, 0.0001"
+                />
+
+                <small> Valeurs séparées par des virgules. </small>
+              </div>
+
+              <div id="infinite-multi-fields" class="field" hidden>
+                <label for="threshold-list"> Seuils A </label>
+
+                <input
+                  id="threshold-list"
+                  type="text"
+                  value="1, 10, 100, 1000"
+                />
+
+                <small> Valeurs séparées par des virgules. </small>
+              </div>
+            </details>
             <button type="submit">Tester la conjecture</button>
           </form>
         </section>

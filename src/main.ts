@@ -7,6 +7,10 @@ import type {
   InfiniteLimitDirection,
   InfiniteLimitTestedTerm,
 } from "./sequences/testInfiniteLimit";
+import { testFiniteLimitForEpsilons } from "./sequences/testFiniteLimitForEpsilons";
+import type { FiniteLimitTestResult } from "./sequences/testFiniteLimit";
+import { testInfiniteLimitForThresholds } from "./sequences/testInfiniteLimitForThresholds";
+import type { InfiniteLimitTestResult } from "./sequences/testInfiniteLimit";
 
 type LimitType = "finite" | "positiveInfinity" | "negativeInfinity";
 
@@ -38,6 +42,14 @@ const thresholdInput = getElement<HTMLInputElement>("threshold");
 
 const maxNInput = getElement<HTMLInputElement>("max-n");
 
+const finiteMultiFields = getElement<HTMLDivElement>("finite-multi-fields");
+
+const infiniteMultiFields = getElement<HTMLDivElement>("infinite-multi-fields");
+
+const epsilonListInput = getElement<HTMLInputElement>("epsilon-list");
+
+const thresholdListInput = getElement<HTMLInputElement>("threshold-list");
+
 const resultSection = getElement<HTMLElement>("result");
 
 limitTypeSelect.addEventListener("change", () => {
@@ -47,7 +59,36 @@ limitTypeSelect.addEventListener("change", () => {
 
   finiteFields.hidden = !isFinite;
   infiniteFields.hidden = isFinite;
+
+  finiteMultiFields.hidden = !isFinite;
+  infiniteMultiFields.hidden = isFinite;
+
+  if (limitType === "positiveInfinity") {
+    thresholdListInput.value = "1, 10, 100, 1000";
+  }
+
+  if (limitType === "negativeInfinity") {
+    thresholdListInput.value = "-1, -10, -100, -1000";
+  }
 });
+
+function parseNumberList(value: string): number[] {
+  const values = value
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item !== "")
+    .map(Number);
+
+  if (values.length === 0) {
+    throw new Error("La liste de valeurs ne peut pas être vide.");
+  }
+
+  if (values.some((value) => !Number.isFinite(value))) {
+    throw new Error("Toutes les valeurs doivent être des nombres valides.");
+  }
+
+  return values;
+}
 
 function renderFiniteTermsTable(
   terms: {
@@ -152,6 +193,103 @@ function renderInfiniteTermsTable(
   `;
 }
 
+function renderMultiEpsilonTable(results: FiniteLimitTestResult[]): string {
+  const rows = results
+    .map(
+      (result) => `
+        <tr>
+          <td>${result.epsilon}</td>
+
+          <td>
+            ]${result.lowerBound} ;
+            ${result.upperBound}[
+          </td>
+
+          <td>
+            ${result.candidateN === null ? "—" : result.candidateN}
+          </td>
+
+          <td>
+            ${result.candidateN === null ? "✗" : "✓"}
+          </td>
+        </tr>
+      `,
+    )
+    .join("");
+
+  return `
+    <div class="multi-test-result">
+      <h3>Analyse avec plusieurs ε</h3>
+
+      <table class="terms-table">
+        <thead>
+          <tr>
+            <th>ε</th>
+            <th>Intervalle</th>
+            <th>N candidat</th>
+            <th>Résultat</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderMultiThresholdTable(
+  results: InfiniteLimitTestResult[],
+  direction: InfiniteLimitDirection,
+): string {
+  const conditionSymbol = direction === "positive" ? ">" : "<";
+
+  const rows = results
+    .map(
+      (result) => `
+        <tr>
+          <td>${result.threshold}</td>
+
+          <td>
+            u(n) ${conditionSymbol}
+            ${result.threshold}
+          </td>
+
+          <td>
+            ${result.candidateN === null ? "—" : result.candidateN}
+          </td>
+
+          <td>
+            ${result.candidateN === null ? "✗" : "✓"}
+          </td>
+        </tr>
+      `,
+    )
+    .join("");
+
+  return `
+    <div class="multi-test-result">
+      <h3>Analyse avec plusieurs seuils A</h3>
+
+      <table class="terms-table">
+        <thead>
+          <tr>
+            <th>A</th>
+            <th>Condition</th>
+            <th>N candidat</th>
+            <th>Résultat</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 // ----- Traitement d'une limite finie ------
 
 function runFiniteLimitTest(expression: string, maxN: number): void {
@@ -165,6 +303,21 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
     captureTermsUpTo: 30,
     outsideExamplesCount: 5,
   });
+
+  const epsilons = parseNumberList(epsilonListInput.value);
+
+  if (epsilons.some((epsilon) => epsilon <= 0)) {
+    throw new Error(
+      "Toutes les valeurs de ε doivent être strictement positives.",
+    );
+  }
+
+  const multiResult = testFiniteLimitForEpsilons(
+    sequence,
+    limit,
+    epsilons,
+    maxN,
+  );
 
   const candidateText =
     result.candidateN === null
@@ -212,6 +365,8 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
 
   ${renderFiniteTermsTable(result.capturedTerms)}
 
+  ${renderMultiEpsilonTable(multiResult.results)}
+
   <p class="numeric-warning">
     ⚠ Test numérique : ce résultat ne constitue pas une preuve mathématique.
   </p>
@@ -232,6 +387,15 @@ function runInfiniteLimitTest(
   const direction = limitType === "positiveInfinity" ? "positive" : "negative";
 
   const result = testInfiniteLimit(sequence, direction, threshold, maxN);
+
+  const thresholds = parseNumberList(thresholdListInput.value);
+
+  const multiResult = testInfiniteLimitForThresholds(
+    sequence,
+    direction,
+    thresholds,
+    maxN,
+  );
 
   // const symbol = direction === "positive" ? "+∞" : "-∞";
 
@@ -293,6 +457,8 @@ function runInfiniteLimitTest(
   <h3>Termes significatifs</h3>
 
   ${renderInfiniteTermsTable(result.sampledTerms, direction, threshold)}
+
+  ${renderMultiThresholdTable(multiResult.results, direction)}
 
   <p class="numeric-warning">
     ⚠ Test numérique :
