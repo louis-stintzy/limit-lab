@@ -1,13 +1,86 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>limit-lab</title>
+    <title>Limit Lab</title>
   </head>
+
   <body>
-    <div id="app"></div>
+    <main class="container">
+      <header>
+        <h1>Limit Lab</h1>
+        <p>Laboratoire numérique pour explorer les limites de suites.</p>
+      </header>
+
+      <section class="panel">
+        <form id="limit-form">
+          <div class="field">
+            <label for="sequence-expression"> Suite u(n) </label>
+
+            <input
+              id="sequence-expression"
+              type="text"
+              value="2 + 1 / n^2"
+              required
+            />
+
+            <small> Exemple : 2 + 1 / n^2 ou sqrt(3 * n + 4) </small>
+          </div>
+
+          <div class="field">
+            <label for="limit-type"> Limite conjecturée </label>
+
+            <select id="limit-type">
+              <option value="finite">Limite finie</option>
+
+              <option value="positiveInfinity">+∞</option>
+
+              <option value="negativeInfinity">-∞</option>
+            </select>
+          </div>
+
+          <div id="finite-fields">
+            <div class="field">
+              <label for="limit-value"> Valeur L </label>
+
+              <input id="limit-value" type="number" value="2" step="any" />
+            </div>
+
+            <div class="field">
+              <label for="epsilon"> ε </label>
+
+              <input
+                id="epsilon"
+                type="number"
+                value="0.01"
+                min="0"
+                step="any"
+              />
+            </div>
+          </div>
+
+          <div id="infinite-fields" hidden>
+            <div class="field">
+              <label for="threshold"> Seuil A </label>
+
+              <input id="threshold" type="number" value="100" step="any" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="max-n"> Rang maximal testé </label>
+
+            <input id="max-n" type="number" value="10000" min="1" step="1" />
+          </div>
+
+          <button type="submit">Tester la conjecture</button>
+        </form>
+      </section>
+
+      <section id="result" class="panel" hidden></section>
+    </main>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

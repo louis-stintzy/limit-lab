@@ -1,166 +1,208 @@
-import {
-  testFiniteLimit,
-  type FiniteLimitTestResult,
-} from "./sequences/testFiniteLimit";
-import { testFiniteLimitForEpsilons } from "./sequences/testFiniteLimitForEpsilons";
+import "./style.css";
+
+import { createSequenceFromExpression } from "./math/createSequenceFromExpression";
+import { testFiniteLimit } from "./sequences/testFiniteLimit";
 import { testInfiniteLimit } from "./sequences/testInfiniteLimit";
 
-const sequence = (n: number): number => {
-  return 2 + 1 / n ** 2;
-};
+type LimitType = "finite" | "positiveInfinity" | "negativeInfinity";
 
-function printFiniteLimitResult(
-  title: string,
-  result: FiniteLimitTestResult,
-): void {
-  console.log("=".repeat(60));
-  console.log(title);
-  console.log("=".repeat(60));
+function getElement<T extends HTMLElement>(id: string): T {
+  const element = document.getElementById(id);
 
-  console.log(`Limite conjecturée : ${result.limit}`);
-  console.log(`epsilon : ${result.epsilon}`);
-  console.log(`Intervalle : ]${result.lowerBound} ; ${result.upperBound}[`);
-  console.log(`Testé jusqu'à n = ${result.testedUntil}`);
-  console.log(`Statut : ${result.status}`);
-  console.log(`Dernier n hors intervalle : ${result.lastOutsideN}`);
-  console.log(`Rang candidat N : ${result.candidateN}`);
-
-  console.log("\nPremiers termes capturés :");
-  for (const term of result.capturedTerms) {
-    console.log(
-      `u(${term.n}) = ${term.value} | dedans ? ${term.isInside} | distance à la limite = ${term.distanceToLimit}`,
-    );
+  if (!element) {
+    throw new Error(`Élément #${id} introuvable.`);
   }
 
-  console.log("\nPremiers termes hors de l'intervalle :");
-  if (result.firstOutsideTerms.length === 0) {
-    console.log("Aucun.");
-  } else {
-    for (const term of result.firstOutsideTerms) {
-      console.log(
-        `u(${term.n}) = ${term.value} | distance = ${term.distanceToLimit}`,
-      );
-    }
-  }
-
-  console.log("\nDerniers termes hors de l'intervalle :");
-  if (result.lastOutsideTerms.length === 0) {
-    console.log("Aucun.");
-  } else {
-    for (const term of result.lastOutsideTerms) {
-      console.log(
-        `u(${term.n}) = ${term.value} | distance = ${term.distanceToLimit}`,
-      );
-    }
-  }
-
-  console.log(
-    "\n⚠️ Rappel : il s'agit d'un test numérique, pas d'une preuve mathématique.",
-  );
-  console.log("\n");
+  return element as T;
 }
 
-const correctResult = testFiniteLimit(sequence, 2, 0.01, 10_000, {
-  captureTermsUpTo: 15,
-  outsideExamplesCount: 5,
+const form = getElement<HTMLFormElement>("limit-form");
+
+const expressionInput = getElement<HTMLInputElement>("sequence-expression");
+
+const limitTypeSelect = getElement<HTMLSelectElement>("limit-type");
+
+const finiteFields = getElement<HTMLDivElement>("finite-fields");
+
+const infiniteFields = getElement<HTMLDivElement>("infinite-fields");
+
+const limitValueInput = getElement<HTMLInputElement>("limit-value");
+
+const epsilonInput = getElement<HTMLInputElement>("epsilon");
+
+const thresholdInput = getElement<HTMLInputElement>("threshold");
+
+const maxNInput = getElement<HTMLInputElement>("max-n");
+
+const resultSection = getElement<HTMLElement>("result");
+
+limitTypeSelect.addEventListener("change", () => {
+  const limitType = limitTypeSelect.value as LimitType;
+
+  const isFinite = limitType === "finite";
+
+  finiteFields.hidden = !isFinite;
+  infiniteFields.hidden = isFinite;
 });
 
-const wrongResult = testFiniteLimit(sequence, 2.5, 0.1, 10_000, {
-  captureTermsUpTo: 15,
-  outsideExamplesCount: 5,
+// ----- Traitement d'une limite finie ------
+
+function runFiniteLimitTest(expression: string, maxN: number): void {
+  const limit = Number(limitValueInput.value);
+
+  const epsilon = Number(epsilonInput.value);
+
+  const sequence = createSequenceFromExpression(expression);
+
+  const result = testFiniteLimit(sequence, limit, epsilon, maxN);
+
+  const candidateText =
+    result.candidateN === null
+      ? "Aucun rang candidat trouvé."
+      : `Rang candidat : N = ${result.candidateN}`;
+
+  resultSection.innerHTML = `
+    <h2>Résultat</h2>
+
+    <p>
+      Suite :
+      <strong>u(n) = ${expression}</strong>
+    </p>
+
+    <p>
+      Limite conjecturée :
+      <strong>${limit}</strong>
+    </p>
+
+    <p>
+      ε = ${epsilon}
+    </p>
+
+    <p>
+      Intervalle :
+      ]${result.lowerBound} ;
+      ${result.upperBound}[
+    </p>
+
+    <p>
+      ${candidateText}
+    </p>
+
+    <p>
+      Test effectué jusqu'à
+      n = ${result.testedUntil}.
+    </p>
+
+    <p>
+      <strong>
+        ⚠ Ceci est un test numérique,
+        pas une preuve mathématique.
+      </strong>
+    </p>
+  `;
+}
+
+// ----- Traitement de \(+\infty\) et \(-\infty\) -----
+
+function runInfiniteLimitTest(
+  expression: string,
+  maxN: number,
+  limitType: LimitType,
+): void {
+  const threshold = Number(thresholdInput.value);
+
+  const sequence = createSequenceFromExpression(expression);
+
+  const direction = limitType === "positiveInfinity" ? "positive" : "negative";
+
+  const result = testInfiniteLimit(sequence, direction, threshold, maxN);
+
+  const symbol = direction === "positive" ? "+∞" : "-∞";
+
+  const inequality =
+    direction === "positive" ? `u(n) > ${threshold}` : `u(n) < ${threshold}`;
+
+  const candidateText =
+    result.candidateN === null
+      ? "Aucun rang candidat trouvé."
+      : `Rang candidat : N = ${result.candidateN}`;
+
+  resultSection.innerHTML = `
+    <h2>Résultat</h2>
+
+    <p>
+      Suite :
+      <strong>u(n) = ${expression}</strong>
+    </p>
+
+    <p>
+      Limite conjecturée :
+      <strong>${symbol}</strong>
+    </p>
+
+    <p>
+      Seuil A = ${threshold}
+    </p>
+
+    <p>
+      Condition recherchée :
+      <strong>${inequality}</strong>
+    </p>
+
+    <p>
+      ${candidateText}
+    </p>
+
+    <p>
+      Test effectué jusqu'à
+      n = ${result.testedUntil}.
+    </p>
+
+    <p>
+      <strong>
+        ⚠ Ceci est un test numérique,
+        pas une preuve mathématique.
+      </strong>
+    </p>
+  `;
+}
+
+// ----- Soumission du formulaire -----
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  try {
+    const expression = expressionInput.value.trim();
+
+    const maxN = Number(maxNInput.value);
+
+    const limitType = limitTypeSelect.value as LimitType;
+
+    if (!Number.isSafeInteger(maxN) || maxN < 1) {
+      throw new Error("Le rang maximal doit être un entier positif.");
+    }
+
+    if (limitType === "finite") {
+      runFiniteLimitTest(expression, maxN);
+    } else {
+      runInfiniteLimitTest(expression, maxN, limitType);
+    }
+
+    resultSection.hidden = false;
+  } catch (error) {
+    resultSection.hidden = false;
+
+    resultSection.innerHTML = `
+        <h2>Erreur</h2>
+
+        <p>
+          ${
+            error instanceof Error
+              ? error.message
+              : "Une erreur inconnue est survenue."
+          }
+        </p>
+      `;
+  }
 });
-
-printFiniteLimitResult("Test avec la bonne conjecture L = 2", correctResult);
-printFiniteLimitResult("Test avec la mauvaise conjecture L = 2.5", wrongResult);
-
-const epsilonTests = testFiniteLimitForEpsilons(
-  sequence,
-  2,
-  [1, 0.1, 0.01, 0.001, 0.0001],
-  100_000,
-);
-
-console.table(
-  epsilonTests.results.map((result) => ({
-    epsilon: result.epsilon,
-    lowerBound: result.lowerBound,
-    upperBound: result.upperBound,
-    candidateN: result.candidateN,
-    status: result.status,
-  })),
-);
-
-const wrongEpsilonTests = testFiniteLimitForEpsilons(
-  sequence,
-  2.5,
-  [1, 0.5, 0.25, 0.1, 0.01],
-  100_000,
-);
-
-console.table(
-  wrongEpsilonTests.results.map((result) => ({
-    epsilon: result.epsilon,
-    candidateN: result.candidateN,
-    status: result.status,
-  })),
-);
-
-const sequencePositive = (n: number): number => {
-  return Math.sqrt(3 * n + 4);
-};
-
-const positiveResult = testInfiniteLimit(
-  sequencePositive,
-  "positive",
-  100,
-  10_000,
-);
-
-console.log("Test de limite +∞");
-console.table(positiveResult);
-
-const sequenceNegative = (n: number): number => {
-  return -(n ** 2);
-};
-
-const negativeResult = testInfiniteLimit(
-  sequenceNegative,
-  "negative",
-  -100,
-  10_000,
-);
-
-console.log("Test de limite -∞");
-console.table(negativeResult);
-
-import { testInfiniteLimitForThresholds } from "./sequences/testInfiniteLimitForThresholds";
-
-const thresholdTests = testInfiniteLimitForThresholds(
-  sequencePositive,
-  "positive",
-  [1, 10, 100, 1000],
-  1_000_000,
-);
-
-console.table(
-  thresholdTests.results.map((result) => ({
-    A: result.threshold,
-    candidateN: result.candidateN,
-    status: result.status,
-  })),
-);
-
-const wrongInfiniteResult = testInfiniteLimitForThresholds(
-  sequence,
-  "positive",
-  [1, 2, 3, 10, 100],
-  10_000,
-);
-
-console.table(
-  wrongInfiniteResult.results.map((result) => ({
-    A: result.threshold,
-    candidateN: result.candidateN,
-    status: result.status,
-  })),
-);
