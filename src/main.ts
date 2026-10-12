@@ -332,10 +332,10 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
     maxN,
   );
 
-  const candidateText =
-    result.candidateN === null
-      ? "Aucun rang candidat trouvé."
-      : `Rang candidat : N = ${result.candidateN}`;
+  // const candidateText =
+  //   result.candidateN === null
+  //     ? "Aucun rang candidat trouvé."
+  //     : `Rang candidat : N = ${result.candidateN}`;
 
   resultSection.innerHTML = `
   <h2>Résultat</h2>
