@@ -113,7 +113,7 @@ export function renderFiniteSequenceChart(
     },
   ];
 
-  currentChart = new Chart(canvas, {
+  currentChart = new Chart<"line", { x: number; y: number }[]>(canvas, {
     type: "line",
     data: {
       datasets,
