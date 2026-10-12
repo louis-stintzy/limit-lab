@@ -1,4 +1,4 @@
-import { evaluate } from "mathjs";
+import { compile } from "mathjs";
 import type { Sequence } from "../sequences/testFiniteLimit";
 
 export function createSequenceFromExpression(expression: string): Sequence {
@@ -6,8 +6,10 @@ export function createSequenceFromExpression(expression: string): Sequence {
     throw new Error("L'expression de la suite ne peut pas être vide.");
   }
 
+  const compiledExpression = compile(expression);
+
   return (n: number): number => {
-    const value = evaluate(expression, { n });
+    const value = compiledExpression.evaluate({ n });
 
     if (typeof value !== "number" || !Number.isFinite(value)) {
       throw new Error(
