@@ -22,19 +22,21 @@ function destroyCurrentChart(): void {
 function buildFocusedWindow(
   maxN: number,
   candidateN: number | null,
-  radius = 5,
+  before = 5,
+  after = 8,
 ): ChartWindow {
   if (candidateN !== null) {
     return {
-      minN: Math.max(1, candidateN - radius),
-      maxN: Math.min(maxN, candidateN + radius),
+      minN: Math.max(1, candidateN - before),
+      maxN: Math.min(maxN, candidateN + after),
     };
   }
 
   // Si aucun rang candidat n'est trouvé,
   // on regarde les derniers termes testés.
+
   return {
-    minN: Math.max(1, maxN - 10),
+    minN: Math.max(1, maxN - 12),
     maxN,
   };
 }
@@ -59,7 +61,7 @@ export function renderFiniteSequenceChart(
 ): void {
   destroyCurrentChart();
 
-  const window = buildFocusedWindow(maxN, candidateN, 5);
+  const window = buildFocusedWindow(maxN, candidateN, 5, 8);
 
   const indexes = buildIndexesFromWindow(window);
 
@@ -95,7 +97,8 @@ export function renderFiniteSequenceChart(
       ],
       pointRadius: 0,
       borderDash: [6, 4],
-      borderWidth: 1,
+      // borderWidth: 1.5,
+      // borderColor: "#7c3aed",
     },
     {
       label: "L + ε",
@@ -105,7 +108,8 @@ export function renderFiniteSequenceChart(
       ],
       pointRadius: 0,
       borderDash: [6, 4],
-      borderWidth: 1,
+      // borderWidth: 1.5,
+      // borderColor: "#7c3aed",
     },
   ];
 
