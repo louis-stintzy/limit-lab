@@ -182,6 +182,18 @@ button {
   font-size: 0.9rem;
 }
 
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: #f0f4ff;
+}
+
+.clickable-row td {
+  transition: background 0.15s ease;
+}
+
 .chart-wrapper {
   position: relative;
   height: 280px;

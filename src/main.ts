@@ -202,7 +202,11 @@ function renderMultiEpsilonTable(results: FiniteLimitTestResult[]): string {
   const rows = results
     .map(
       (result) => `
-        <tr>
+        <tr
+          class="clickable-row"
+          data-epsilon="${result.epsilon}"
+          data-candidate-n="${result.candidateN ?? ""}"
+        >
           <td>${result.epsilon}</td>
 
           <td>
@@ -226,7 +230,7 @@ function renderMultiEpsilonTable(results: FiniteLimitTestResult[]): string {
     <div class="multi-test-result">
       <h3>Analyse avec plusieurs ε</h3>
 
-      <table class="terms-table">
+      <table class="terms-table" id="multi-epsilon-table">
         <thead>
           <tr>
             <th>ε</th>
@@ -253,7 +257,11 @@ function renderMultiThresholdTable(
   const rows = results
     .map(
       (result) => `
-        <tr>
+        <tr
+          class="clickable-row"
+          data-threshold="${result.threshold}"
+          data-candidate-n="${result.candidateN ?? ""}"
+        >
           <td>${result.threshold}</td>
 
           <td>
@@ -277,7 +285,7 @@ function renderMultiThresholdTable(
     <div class="multi-test-result">
       <h3>Analyse avec plusieurs seuils A</h3>
 
-      <table class="terms-table">
+      <table class="terms-table" id="multi-threshold-table">
         <thead>
           <tr>
             <th>A</th>
@@ -391,6 +399,33 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
     maxN,
     result.candidateN,
   );
+
+  const epsilonTable = document.getElementById("multi-epsilon-table");
+
+  epsilonTable?.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement;
+
+    const row = target.closest<HTMLTableRowElement>("tr[data-epsilon]");
+
+    if (!row) {
+      return;
+    }
+
+    const epsilon = Number(row.dataset.epsilon);
+
+    const candidateNValue = row.dataset.candidateN;
+
+    const candidateN = candidateNValue === "" ? null : Number(candidateNValue);
+
+    renderFiniteSequenceChart(
+      canvas,
+      sequence,
+      limit,
+      epsilon,
+      maxN,
+      candidateN,
+    );
+  });
 }
 
 // ----- Traitement de \(+\infty\) et \(-\infty\) -----
@@ -501,6 +536,33 @@ function runInfiniteLimitTest(
     maxN,
     result.candidateN,
   );
+
+  const thresholdTable = document.getElementById("multi-threshold-table");
+
+  thresholdTable?.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement;
+
+    const row = target.closest<HTMLTableRowElement>("tr[data-threshold]");
+
+    if (!row) {
+      return;
+    }
+
+    const selectedThreshold = Number(row.dataset.threshold);
+
+    const candidateNValue = row.dataset.candidateN;
+
+    const candidateN = candidateNValue === "" ? null : Number(candidateNValue);
+
+    renderInfiniteSequenceChart(
+      canvas,
+      sequence,
+      direction,
+      selectedThreshold,
+      maxN,
+      candidateN,
+    );
+  });
 }
 
 // ----- Soumission du formulaire -----
