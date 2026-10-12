@@ -374,6 +374,12 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
     </div>
   </div>
 
+  <p
+    id="chart-context"
+    class="chart-context"
+  >
+  </p>
+
   <div class="chart-wrapper">
     <canvas id="sequence-chart"></canvas>
   </div>
@@ -411,7 +417,13 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
       return;
     }
 
-    const epsilon = Number(row.dataset.epsilon);
+    epsilonTable
+      .querySelectorAll(".active-row")
+      .forEach((element) => element.classList.remove("active-row"));
+
+    row.classList.add("active-row");
+
+    const selectedEpsilon = Number(row.dataset.epsilon);
 
     const candidateNValue = row.dataset.candidateN;
 
@@ -421,10 +433,17 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
       canvas,
       sequence,
       limit,
-      epsilon,
+      selectedEpsilon,
       maxN,
       candidateN,
     );
+
+    const chartContext = getElement<HTMLElement>("chart-context");
+
+    chartContext.textContent =
+      candidateN === null
+        ? `Graphique mis à jour pour ε = ${selectedEpsilon} — aucun rang candidat trouvé.`
+        : `Graphique mis à jour pour ε = ${selectedEpsilon} — N = ${candidateN}.`;
   });
 }
 
@@ -509,6 +528,12 @@ function runInfiniteLimitTest(
     </div>
   </div>
 
+  <p
+    id="chart-context"
+    class="chart-context"
+  >
+  </p>
+
   <div class="chart-wrapper">
     <canvas id="sequence-chart"></canvas>
   </div>
@@ -548,6 +573,12 @@ function runInfiniteLimitTest(
       return;
     }
 
+    thresholdTable
+      .querySelectorAll(".active-row")
+      .forEach((element) => element.classList.remove("active-row"));
+
+    row.classList.add("active-row");
+
     const selectedThreshold = Number(row.dataset.threshold);
 
     const candidateNValue = row.dataset.candidateN;
@@ -562,6 +593,13 @@ function runInfiniteLimitTest(
       maxN,
       candidateN,
     );
+
+    const chartContext = getElement<HTMLElement>("chart-context");
+
+    chartContext.textContent =
+      candidateN === null
+        ? `Graphique mis à jour pour A = ${selectedThreshold} — aucun rang candidat trouvé.`
+        : `Graphique mis à jour pour A = ${selectedThreshold} — N = ${candidateN}.`;
   });
 }
 

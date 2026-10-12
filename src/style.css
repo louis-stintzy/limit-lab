@@ -190,8 +190,19 @@ button {
   background: #f0f4ff;
 }
 
+.clickable-row.active-row {
+  background: #e8eefc;
+  font-weight: 600;
+}
+
 .clickable-row td {
   transition: background 0.15s ease;
+}
+
+.chart-context {
+  margin: 0.25rem 0 0.4rem;
+  font-size: 0.85rem;
+  text-align: center;
 }
 
 .chart-wrapper {
