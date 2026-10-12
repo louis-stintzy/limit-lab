@@ -313,7 +313,7 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
   const sequence = createSequenceFromExpression(expression);
 
   const result = testFiniteLimit(sequence, limit, epsilon, maxN, {
-    captureTermsUpTo: 30,
+    captureTermsUpTo: 20,
     outsideExamplesCount: 5,
   });
 
@@ -374,21 +374,26 @@ function runFiniteLimitTest(expression: string, maxN: number): void {
     </div>
   </div>
 
-  <p
-    id="chart-context"
-    class="chart-context"
-  >
-  </p>
+<div class="result-main-grid">
+  <div class="chart-area">
+    <p
+      id="chart-context"
+      class="chart-context"
+    ></p>
 
-  <div class="chart-wrapper">
-    <canvas id="sequence-chart"></canvas>
+    <div class="chart-wrapper">
+      <canvas id="sequence-chart"></canvas>
+    </div>
   </div>
 
-  <h3>Premiers termes de la suite</h3>
+  <div class="terms-area">
+    <h3>Premiers termes</h3>
 
-  ${renderFiniteTermsTable(result.capturedTerms)}
+    ${renderFiniteTermsTable(result.capturedTerms)}
+  </div>
+</div>
 
-  ${renderMultiEpsilonTable(multiResult.results)}
+${renderMultiEpsilonTable(multiResult.results)}
 
   <p class="numeric-warning">
     ⚠ Test numérique : ce résultat ne constitue pas une preuve mathématique.
@@ -528,21 +533,26 @@ function runInfiniteLimitTest(
     </div>
   </div>
 
-  <p
-    id="chart-context"
-    class="chart-context"
-  >
-  </p>
+<div class="result-main-grid">
+  <div class="chart-area">
+    <p
+      id="chart-context"
+      class="chart-context"
+    ></p>
 
-  <div class="chart-wrapper">
-    <canvas id="sequence-chart"></canvas>
+    <div class="chart-wrapper">
+      <canvas id="sequence-chart"></canvas>
+    </div>
   </div>
 
-  <h3>Termes significatifs</h3>
+  <div class="terms-area">
+    <h3>Termes significatifs</h3>
 
-  ${renderInfiniteTermsTable(result.sampledTerms, direction, threshold)}
+    ${renderInfiniteTermsTable(result.sampledTerms, direction, threshold)}
+  </div>
+</div>
 
-  ${renderMultiThresholdTable(multiResult.results, direction)}
+${renderMultiThresholdTable(multiResult.results, direction)}
 
   <p class="numeric-warning">
     ⚠ Test numérique :
